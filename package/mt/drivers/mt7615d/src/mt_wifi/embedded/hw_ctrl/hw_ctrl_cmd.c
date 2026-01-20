@@ -376,7 +376,7 @@ VOID RTMP_MAC_RECOVERY(struct _RTMP_ADAPTER *pAd, UINT32 Status)
 	}
 }
 
-INT IsStopingPdma(ERR_RECOVERY_CTRL_T *pErrRecoveryCtl)
+inline INT IsStopingPdma(ERR_RECOVERY_CTRL_T *pErrRecoveryCtl)
 {
 	return (pErrRecoveryCtl->errRecovState == ERR_RECOV_STOP_IDLE) ? FALSE :
 									       TRUE;

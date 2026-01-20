@@ -271,13 +271,11 @@ static int DEVINIT rt_pci_probe(struct pci_dev *pdev,
 		}
 	} else
 #endif
-		if (!pci_set_dma_mask(pdev, DMA_BIT_MASK(32))) {
+	if (dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(32))) {
 		/*
 		 * pci_set_consistent_dma_mask() will always be able to set the same
 		 * or a smaller mask as pci_set_dma_mask()
 		 */
-		pci_set_consistent_dma_mask(pdev, DMA_BIT_MASK(32));
-	} else {
 		MTWF_LOG(DBG_CAT_HIF, CATHIF_PCI, DBG_LVL_ERROR,
 			 ("set DMA mask failed!errno=%d\n", rv));
 		goto err_out;

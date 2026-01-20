@@ -142,6 +142,7 @@ VOID fp_tx_pkt_deq_func(RTMP_ADAPTER *pAd)
 	BOOLEAN need_schedule = (pAd->tx_dequeue_scheduable ? TRUE : FALSE);
 	UCHAR user_prio;
 	struct _RTMP_CHIP_CAP *cap = hc_get_chip_cap(pAd->hdev_ctrl);
+	UINT8 num_of_tx_ring = GET_NUM_OF_TX_RING(cap);
 
 #ifdef CONFIG_TP_DBG
 	struct tp_debug *tp_dbg = &pAd->tr_ctl.tp_dbg;
@@ -163,36 +164,44 @@ VOID fp_tx_pkt_deq_func(RTMP_ADAPTER *pAd)
 		}
 
 		wdev = wdev_search_by_pkt(pAd, pkt);
-		wdev_ops = wdev->wdev_ops;
-		pTxBlk->resource_idx =
+
+		if (wdev) {
+			wdev_ops = wdev->wdev_ops;
+			pTxBlk->resource_idx =
 			arch_ops->get_resource_idx(pAd, wdev, 0, 0);
-		ret = arch_ops->check_hw_resource(pAd, wdev,
-						  pTxBlk->resource_idx);
+			ret = arch_ops->check_hw_resource(pAd, wdev,
+							  pTxBlk->resource_idx);
 
-		if (ret) {
-			if (ret & NDIS_STATUS_RESOURCES) {
-				mtd_free_txd(pAd, pTxBlk->resource_idx);
-				ret = arch_ops->check_hw_resource(
-					pAd, wdev, pTxBlk->resource_idx);
-				if (ret)
+			if (ret) {
+				if (ret & NDIS_STATUS_RESOURCES) {
+					mtd_free_txd(pAd, pTxBlk->resource_idx);
+					ret = arch_ops->check_hw_resource(
+						pAd, wdev, pTxBlk->resource_idx);
+					if (ret)
+						break;
+				} else
 					break;
-			} else
-				break;
+			}
+
+			pkt = fp_get_tx_element(pAd);
+			Wcid = RTMP_GET_PACKET_WCID(pkt);
+
+			/*if wcid is out of MAC table size, free it*/
+			if (Wcid >= MAX_LEN_OF_MAC_TABLE) {
+				MTWF_LOG(DBG_CAT_TX, DBG_SUBCAT_ALL, DBG_LVL_INFO,
+					 ("%s(): WCID is invalid\n", __func__));
+				pAd->tr_ctl.tx_sw_q_drop++;
+				RELEASE_NDIS_PACKET(pAd, pkt, NDIS_STATUS_FAILURE);
+				continue;
+			}
+
+			pTxBlk->wdev = wdev;
+		} else {
+                        /*Dequeue and release the illegal pkt*/
+                        pkt = fp_get_tx_element(pAd);
+                        RELEASE_NDIS_PACKET(pAd, pkt, NDIS_STATUS_FAILURE);
+                        continue;
 		}
-
-		pkt = fp_get_tx_element(pAd);
-		Wcid = RTMP_GET_PACKET_WCID(pkt);
-
-		/*if wcid is out of MAC table size, free it*/
-		if (Wcid >= MAX_LEN_OF_MAC_TABLE) {
-			MTWF_LOG(DBG_CAT_TX, DBG_SUBCAT_ALL, DBG_LVL_INFO,
-				 ("%s(): WCID is invalid\n", __func__));
-			pAd->tr_ctl.tx_sw_q_drop++;
-			RELEASE_NDIS_PACKET(pAd, pkt, NDIS_STATUS_FAILURE);
-			continue;
-		}
-
-		pTxBlk->wdev = wdev;
 
 		tr_entry = &pAd->MacTab.tr_entry[Wcid];
 
@@ -221,7 +230,7 @@ VOID fp_tx_pkt_deq_func(RTMP_ADAPTER *pAd)
 			KickRingBitMap |= (1 << pTxBlk->resource_idx);
 	}
 
-	while (KickRingBitMap != 0 && idx < GET_NUM_OF_TX_RING(cap)) {
+	while (KickRingBitMap != 0 && idx < num_of_tx_ring) {
 		if (KickRingBitMap & 0x1) {
 			arch_ops->kickout_data_tx(pAd, pTxBlk, idx);
 #ifdef CONFIG_TP_DBG
@@ -318,7 +327,7 @@ INT32 fp_enq_dataq_pkt(RTMP_ADAPTER *pAd, struct wifi_dev *wdev,
 	if (wlan_operate_get_state(wdev) != WLAN_OPER_STATE_VALID)
 		goto error;
 
-	if (pAd->fp_que.Number >= pAd->fp_que_max_size)
+	if (pAd->fp_que.Number >= DATA_QUE_MAX_NUMS)
 		goto error;
 
 	RTMP_SEM_LOCK(&pAd->fp_que_lock);

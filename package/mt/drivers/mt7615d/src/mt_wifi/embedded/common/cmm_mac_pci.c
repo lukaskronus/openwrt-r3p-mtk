@@ -513,6 +513,16 @@ VOID RTMPResetTxRxRingMemory(RTMP_ADAPTER *pAd)
 
 		NdisZeroMemory(hif->RxRing[index].Cell,
 			       RxRingSize * sizeof(RTMP_DMACB));
+		RTMP_RX_RING *rx_ring;
+		rx_ring = &hif->RxRing[index];
+                if (rx_ring->rx_page.va) {
+                                struct page *page;
+
+                                page = virt_to_page(rx_ring->rx_page.va);
+                                rx_page_frag_cache_drain(page, rx_ring->rx_page.pagecnt_bias);
+                                NdisZeroMemory(&rx_ring->rx_page, sizeof(rx_ring->rx_page));
+                }
+
 	}
 
 	if (pAd->FragFrame.pFragPacket) {

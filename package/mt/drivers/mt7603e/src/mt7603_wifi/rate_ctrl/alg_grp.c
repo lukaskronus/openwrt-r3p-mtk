@@ -1603,12 +1603,12 @@ VOID QuickResponeForRateUpExecAdaptMT(/* actually for both up and down */
 	if (Rate1ErrorRatio < 7)
 		bNoiseEnv = FALSE;
 	else if (Rate1ErrorRatio < 12) {
-		if (RetryRatio > (Rate1ErrorRatio * 3))
+		if (RetryRatio > (Rate1ErrorRatio * 4))
 			bNoiseEnv = TRUE;
 		else
 			bNoiseEnv = FALSE;
 	} else {
-		if (RetryRatio > (Rate1ErrorRatio * 2))
+		if (RetryRatio > (Rate1ErrorRatio * 3))
 			bNoiseEnv = TRUE;
 		else
 			bNoiseEnv = FALSE;

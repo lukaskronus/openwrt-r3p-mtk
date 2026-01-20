@@ -3595,7 +3595,7 @@ VOID AutoChSelBuildChannelListFor5G(IN RTMP_ADAPTER *pAd,
 			pACSChList[ChIdx].CentralChannel = vht_cent_ch_freq(
 				pACSChList[ChIdx].Channel, VHT_BW_80);
 		} else if ((cfg_vht_bw == VHT_BW_160) &&
-			   vht80_channel_group(pAd,
+			   vht160_channel_group(pAd,
 					       pACSChList[ChIdx].Channel)) {
 			pACSChList[ChIdx].Bw = BW_160;
 			idx = 0;

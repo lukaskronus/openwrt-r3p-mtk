@@ -31,8 +31,8 @@
 #define RTMP_PKT_TAIL_PADDING                                                  \
 	11 /* 3(max 4 byte padding) + 4 (last packet padding) + 4 (MaxBulkOutsize align padding) */
 
-#define RTMP_PCI_DMA_TODEVICE 0xFF00
-#define RTMP_PCI_DMA_FROMDEVICE 0xFF01
+#define RTMP_PCI_DMA_TODEVICE 1
+#define RTMP_PCI_DMA_FROMDEVICE 2
 
 #define UNLINK_TIMEOUT_MS 3
 

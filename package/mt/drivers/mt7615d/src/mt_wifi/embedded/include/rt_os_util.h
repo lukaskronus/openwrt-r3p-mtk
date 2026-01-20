@@ -502,7 +502,7 @@ PNDIS_PACKET RTMP_AllocateRxPacketBuffer(
 
 ra_dma_addr_t linux_pci_map_single(void *pDev, void *ptr, size_t size,
 				   int sd_idx, int direction);
-
+void rx_page_frag_cache_drain(struct page *page, unsigned int count);
 void linux_pci_unmap_single(void *pDev, ra_dma_addr_t dma_addr, size_t size,
 			    int direction);
 

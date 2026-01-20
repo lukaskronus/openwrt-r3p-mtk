@@ -215,38 +215,8 @@ static NDIS_STATUS rtmp_ee_flash_reset(RTMP_ADAPTER *pAd, UCHAR *start)
 	INT retval;
 	EEPROM_CONTROL *pE2pCtrl = &pAd->E2pCtrl;
 	struct _RTMP_CHIP_CAP *cap = hc_get_chip_cap(pAd->hdev_ctrl);
-#ifdef RT_SOC_SUPPORT
-#ifdef MULTIPLE_CARD_SUPPORT
-	RTMP_STRING BinFilePath[128];
-	RTMP_STRING *pBinFileName = NULL;
-	UINT32 ChipVerion = (pAd->MACVersion >> 16);
 
-	if (rtmp_get_default_bin_file_by_chip(pAd, ChipVerion, &pBinFileName) ==
-	    TRUE) {
-		if (pAd->MC_RowID > 0)
-			sprintf(BinFilePath, "%s%s", EEPROM_2ND_FILE_DIR,
-				pBinFileName);
-		else
-			sprintf(BinFilePath, "%s%s", EEPROM_1ST_FILE_DIR,
-				pBinFileName);
-
-		src = BinFilePath;
-		MTWF_LOG(DBG_CAT_HW, DBG_SUBCAT_ALL, DBG_LVL_TRACE,
-			 ("%s(): src = %s\n", __func__, src));
-	} else
-#endif /* MULTIPLE_CARD_SUPPORT */
-#endif /* RT_SOC_SUPPORT */
-	{
-#if defined(MT_MAC) && defined(MT7603)
-
-		if (IS_MT7603(pAd))
-			src = EEPROM_DEFAULT_7603_FILE_PATH;
-		else
-#endif /* MT_MAC && MT7603 */
-		{
-			src = EEPROM_DEFAULT_FILE_PATH;
-		}
-	}
+	src = "/etc_ro/wlan/MT7615_EEPROM.bin";
 
 	pE2pCtrl->e2pSource = E2P_SRC_FROM_BIN;
 	RtmpOSFSInfoChange(&osFsInfo, TRUE);

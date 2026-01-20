@@ -1055,6 +1055,9 @@ void announce_802_3_packet(IN VOID *pAdSrc, IN PNDIS_PACKET pPacket,
 	pAd = (RTMP_ADAPTER *)pAdSrc;
 	ASSERT(pAd);
 	ASSERT(pPacket);
+
+	if (pAd == NULL || pPacket == NULL)
+		return;
 	/* MTWF_LOG(DBG_CAT_CFG, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("=>%s(): OpMode=%d\n", __FUNCTION__, OpMode)); */
 
 	MEM_DBG_PKT_FREE_INC(pPacket);

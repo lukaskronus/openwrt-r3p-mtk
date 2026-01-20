@@ -1761,7 +1761,7 @@ inline VOID *hc_get_hif_ctrl(void *hdev_ctrl)
 /*
 *
 */
-VOID *hc_get_os_cookie(void *hdev_ctrl)
+inline VOID *hc_get_os_cookie(void *hdev_ctrl)
 {
 	struct hdev_ctrl *ctrl = hdev_ctrl;
 
@@ -1771,7 +1771,7 @@ VOID *hc_get_os_cookie(void *hdev_ctrl)
 /*
 *
 */
-VOID *hc_get_mcu_ctrl(void *hdev_ctrl)
+inline VOID *hc_get_mcu_ctrl(void *hdev_ctrl)
 {
 	struct hdev_ctrl *ctrl = hdev_ctrl;
 
@@ -1781,7 +1781,7 @@ VOID *hc_get_mcu_ctrl(void *hdev_ctrl)
 /*
 *
 */
-struct _RTMP_ARCH_OP *hc_get_asic_ops(void *hdev_ctrl)
+inline struct _RTMP_ARCH_OP *hc_get_asic_ops(void *hdev_ctrl)
 {
 	struct hdev_ctrl *ctrl = hdev_ctrl;
 

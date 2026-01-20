@@ -7,7 +7,6 @@ else
 WIFI_DRV_PATH = drivers/net/wireless/mtk/mt7615e
 endif
 endif
-
 EXTRA_CFLAGS = -I$(WIFI_DRV_PATH)/mt_wifi/include \
 				-I$(WIFI_DRV_PATH)/mt_wifi/embedded/include \
 				-I$(WIFI_DRV_PATH)/mt_wifi/ate/include \
@@ -200,10 +199,8 @@ cmm_objs := $(SRC_EMBEDDED_DIR)/common/action.o\
 		$(SRC_DIR)/protocol/protection.o\
 		$(SRC_EMBEDDED_DIR)/common/misc_app.o
 
-ifeq ($(CONFIG_MULTI_PROFILE_SUPPORT),y)
 EXTRA_CFLAGS += -DMULTI_PROFILE
 cmm_objs += $(SRC_EMBEDDED_DIR)/common/multi_profile.o
-endif
 
 ifeq ($(CONFIG_DEFAULT_5G_PROFILE),y)
 EXTRA_CFLAGS += -DDEFAULT_5G_PROFILE
@@ -1009,10 +1006,9 @@ chip_objs += $(SRC_DIR)/chips/mt7637.o\
                 $(SRC_DIR)/os/linux/pci_main_dev.o
 endif
 
-ifeq ($(CONFIG_DBDC_MODE),y)
+#ifeq ($(CONFIG_DBDC_MODE),y)
 EXTRA_CFLAGS += -DDBDC_MODE
-endif
-
+#endif
 ifeq ($(CONFIG_G_BAND_256QAM_SUPPORT),y)
 EXTRA_CFLAGS += -DG_BAND_256QAM
 ifeq ($(CONFIG_BRCM_256QAM_SUPPORT),y)
@@ -1171,7 +1167,7 @@ EXTRA_CFLAGS += -DHW_TX_AMSDU_SUPPORT
 #WFLAGS += -DMSP_UTILITY
 
 #EXTRA_CFLAGS += -Wframe-larger-than=4096
-WFLAGS += -Werror
+#WFLAGS += -Werror
 
 ifeq ($(CONFIG_HDR_TRANS_TX_SUPPORT),y)
 	EXTRA_CFLAGS += -DHDR_TRANS_TX_SUPPORT -DCUT_THROUGH_FULL_OFFLOAD
@@ -1290,7 +1286,7 @@ ifeq ($(CONFIG_PLATFORM_DRV_SUPPROT),y)
 EXTRA_CFLAGS += -DPLATFORM_DRIVER_SUPPORT
 endif
 
-EXTRA_CFLAGS += -Werror
+#EXTRA_CFLAGS += -Werror
 ifeq ($(CONFIG_HDR_TRANS_TX_SUPPORT),y)
         EXTRA_CFLAGS += -DHDR_TRANS_TX_SUPPORT -DCUT_THROUGH_FULL_OFFLOAD
 endif

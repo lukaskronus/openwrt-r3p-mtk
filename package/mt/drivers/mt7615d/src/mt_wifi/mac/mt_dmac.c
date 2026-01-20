@@ -2555,7 +2555,7 @@ INT32 mtd_write_txp_info_by_host_v2(RTMP_ADAPTER *pAd, UCHAR *buf,
 	return NDIS_STATUS_SUCCESS;
 }
 
-INT32 mtd_write_txp_info_by_cr4(RTMP_ADAPTER *pAd, UCHAR *buf, TX_BLK *pTxBlk)
+inline INT32 mtd_write_txp_info_by_cr4(RTMP_ADAPTER *pAd, UCHAR *buf, TX_BLK *pTxBlk)
 {
 	CR4_TXP_MSDU_INFO *cr4_txp_msdu_info = (CR4_TXP_MSDU_INFO *)buf;
 	PKT_TOKEN_CB *pktTokenCb = (PKT_TOKEN_CB *)pAd->PktTokenCb;
@@ -3396,7 +3396,7 @@ INT mt_nic_asic_init(RTMP_ADAPTER *pAd)
 	return ret;
 }
 
-INT mtd_check_hw_resource(RTMP_ADAPTER *pAd, struct wifi_dev *wdev,
+inline INT mtd_check_hw_resource(RTMP_ADAPTER *pAd, struct wifi_dev *wdev,
 			  UCHAR resource_idx)
 {
 	UINT free_num;

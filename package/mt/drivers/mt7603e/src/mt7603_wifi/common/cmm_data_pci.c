@@ -2562,7 +2562,7 @@ BOOLEAN RxRing1DoneInterruptHandle(RTMP_ADAPTER *pAd)
 				a. be indicated to upper layer or
 				b. be released if it is discarded
 		*/
-
+		NdisZeroMemory(&rxblk,sizeof(RX_BLK));
 		pRxBlk = &rxblk;
 
 		pRxPacket = GetPacketFromRxRing(pAd, pRxBlk, &bReschedule, &RxPending, 1);

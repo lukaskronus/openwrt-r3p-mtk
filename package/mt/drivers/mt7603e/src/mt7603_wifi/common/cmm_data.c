@@ -992,7 +992,12 @@ NDIS_STATUS MiniportMMRequest(RTMP_ADAPTER *pAd, UCHAR QueIdx, UCHAR *pData, UIN
 		if (bUseDataQ)
 		{
 			/* free Tx(QueIdx) resources*/
-			RTMPFreeTXDUponTxDmaDone(pAd, QueIdx);
+			FreeNum = GET_TXRING_FREENO(pAd, QueIdx);
+			if (FreeNum <= 5)
+			{
+				/* free Tx(QueIdx) resources*/
+				RTMPFreeTXDUponTxDmaDone(pAd, QueIdx);
+			}
 			FreeNum = GET_TXRING_FREENO(pAd, QueIdx);
 		}
 		else

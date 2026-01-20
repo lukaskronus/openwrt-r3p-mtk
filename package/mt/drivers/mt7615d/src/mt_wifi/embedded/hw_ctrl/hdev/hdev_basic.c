@@ -279,7 +279,7 @@ VOID HdevCfgShow(struct hdev_ctrl *ctrl)
 BOOLEAN hdev_obj_state_ready(struct hdev_obj *obj)
 {
 	/* basic sanity */
-	if (!obj)
+	if (obj == NULL)
 		return FALSE;
 
 	if (obj->state == HOBJ_STATE_USED)

@@ -26,7 +26,7 @@
  */
 
 #include "rt_config.h"
-#include <stdarg.h>
+#include <linux/stdarg.h>
 
 #define MCAST_WCID_TO_REMOVE 0 /* Pat: TODO */
 

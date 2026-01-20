@@ -19,6 +19,7 @@
 
 #include "mac/mac.h"
 #include "rtmp_dmacb.h"
+#include <linux/skbuff.h>
 
 #define HIF_BASE 0x4000
 #define MT_HIF_BASE 0x4000
@@ -791,6 +792,7 @@ typedef struct _RTMP_RX_RING {
 	RTMP_DMABUF *free_buf_64k;
 	UINT32 hw_desc_base;
 	UINT32 hw_cnt_addr;
+	struct page_frag_cache rx_page;
 } RTMP_RX_RING ____cacheline_aligned;
 
 enum PACKET_TYPE {

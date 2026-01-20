@@ -315,7 +315,7 @@ endif
 ifeq ($(CROSS_COMPILE),)
 CROSS_COMPILE=armv7a-mediatek451_001_vfp-linux-gnueabi-
 endif
-CC=$(CROSS_COMPILE)gcc
+CC=ccache $(CROSS_COMPILE)gcc
 $(warning =============================================)
 $(warning CC=$(CC) for wifi driver)
 $(warning =============================================)

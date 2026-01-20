@@ -1276,7 +1276,7 @@ DBGPRINT(RT_DEBUG_INFO, ("%s(): txbw=%d, txmode=%d\n", __FUNCTION__, tx_bw, tx_m
 	}
 #endif /* DBG_CTRL_SUPPORT */
 #endif /* RANGE_EXTEND */
-
+	pEntry->HTPhyMode.field.BW = BW_40;
 	/* Reexam each bandwidth's SGI support. */
 	if ((pEntry->HTPhyMode.field.BW==BW_20 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI20_CAPABLE)) ||
 		(pEntry->HTPhyMode.field.BW==BW_40 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI40_CAPABLE)) )

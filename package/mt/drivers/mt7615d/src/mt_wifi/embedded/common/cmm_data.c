@@ -801,7 +801,6 @@ VOID RxVB_Report_Action(IN PRTMP_ADAPTER pAd, IN UCHAR wcid,
 	UINT16 checksum = 0;
 	UINT32 source_ip, destination_ip;
 	UINT16 source_port, destination_port, length;
-
 	prxvbqelmt->g0_debug_set = pAd->ucRxvG0;
 	prxvbqelmt->g1_debug_set = pAd->ucRxvG1;
 	prxvbqelmt->g2_debug_set = pAd->ucRxvG2;
@@ -934,7 +933,6 @@ VOID RxVB_Report_Action(IN PRTMP_ADAPTER pAd, IN UCHAR wcid,
 
 	/* End this frame */
 	skb_put(skb, frame_len);
-
 	/* Report to upper layer */
 	RtmpOsPktProtocolAssign(skb);
 	RtmpOsPktRcvHandle(skb);
@@ -2206,7 +2204,7 @@ UINT32 tx_free_event_handler(RTMP_ADAPTER *ad, VOID *ptr)
 }
 #endif /* CUT_THROUGH */
 
-static UINT32 sanity_and_get_packet_type(RTMP_ADAPTER *ad, VOID *rx_packet)
+inline static UINT32 sanity_and_get_packet_type(RTMP_ADAPTER *ad, VOID *rx_packet)
 {
 	union _RMAC_RXD_0_UNION *rxd_0;
 
@@ -2248,7 +2246,7 @@ UINT32 pkt_alloc_fail_handle(RTMP_ADAPTER *ad, PNDIS_PACKET rx_packet)
 	return 0;
 }
 
-UINT32 mt_rx_pkt_process(RTMP_ADAPTER *pAd, UINT8 hif_idx, RX_BLK *rx_blk,
+inline UINT32 mt_rx_pkt_process(RTMP_ADAPTER *pAd, UINT8 hif_idx, RX_BLK *rx_blk,
 			 PNDIS_PACKET rx_packet)
 {
 	UINT32 rx_pkt_type;
@@ -2584,8 +2582,10 @@ UINT16 tx_pkt_classification(RTMP_ADAPTER *pAd, PNDIS_PACKET pkt,
 	if (VALID_UCAST_ENTRY_WCID(pAd, wcid))
 		pMacEntry = &pAd->MacTab.Content[wcid];
 	else
-		pMacEntry = &pAd->MacTab.Content[MCAST_WCID_TO_REMOVE];
-
+		if (wcid > 0)
+                        pMacEntry = &pAd->MacTab.Content[wcid];
+                else
+                        pMacEntry = &pAd->MacTab.Content[MCAST_WCID_TO_REMOVE];
 	tx_blk->pMacEntry = pMacEntry;
 
 	if (RTMP_GET_PACKET_MGMT_PKT(pkt)) {
@@ -8609,19 +8609,21 @@ UCHAR get_frag_num(RTMP_ADAPTER *pAd, struct wifi_dev *wdev,
 	RTMP_QueryPacketInfo(pPacket, &pkt_info, &src_buf_va, &src_buf_len);
 	pkt_len = pkt_info.TotalPacketLength - LENGTH_802_3 + LENGTH_802_1_H;
 	frag_sz = wlan_operate_get_frag_thld(wdev);
-	if (frag_sz < (LENGTH_802_11 + LENGTH_CRC))
-		return 1;
 	frag_sz = frag_sz - LENGTH_802_11 - LENGTH_CRC;
 
 	if (*src_buf_va & 0x01) {
 		/* fragmentation not allowed on multicast & broadcast */
 		frag_num = 1;
 	} else {
-		frag_num = (pkt_len / frag_sz) + 1;
+		if (pkt_len <= frag_sz)
+                        frag_num = 1;
+		else {
+			frag_num = (pkt_len / frag_sz) + 1;
 
-		/* To get accurate number of fragmentation, Minus 1 if the size just match to allowable fragment size */
-		if (((pkt_len % frag_sz) == 0) && (frag_num > 0))
-			frag_num--;
+			/* To get accurate number of fragmentation, Minus 1 if the size just match to allowable fragment size */
+			if ((pkt_len % frag_sz) == 0)
+				frag_num--;
+		}
 	}
 
 	return frag_num;

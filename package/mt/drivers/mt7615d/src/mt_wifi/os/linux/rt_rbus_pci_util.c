@@ -18,6 +18,7 @@
 #include "rtmp_comm.h"
 #include "rtmp_osabl.h"
 #include "rt_os_util.h"
+#include "hif/hif.h"
 
 #ifdef RTMP_MAC_PCI
 VOID *alloc_rx_buf_1k(void *hif_resource);
@@ -67,15 +68,13 @@ PNDIS_PACKET RTMP_AllocateRxPacketBuffer(VOID *reserved, VOID *dev,
 {
 	struct sk_buff *pkt = NULL;
 	struct device *pdev = (struct device *)dev;
-
+	RTMP_RX_RING *rx_ring = (RTMP_RX_RING *)reserved;
 	switch (type) {
 #ifdef CONFIG_WIFI_BUILD_SKB
 	case DYNAMIC_PAGE_ALLOC:
 		/* pkt is dynamic-alloc dma va address */
-		DEV_ALLOC_FRAG(pkt,
-			       SKB_DATA_ALIGN(SKB_BUF_HEADROOM_RSV + size) +
-				       SKB_DATA_ALIGN(SKB_BUF_TAILROOM_RSV));
-
+                pkt = page_frag_alloc(&rx_ring->rx_page, SKB_DATA_ALIGN(SKB_BUF_HEADROOM_RSV + size)
+                                                                + SKB_DATA_ALIGN(SKB_BUF_TAILROOM_RSV), GFP_ATOMIC);
 		if (pkt)
 			*va = ((PVOID)pkt + SKB_BUF_HEADROOM_RSV);
 
@@ -115,7 +114,7 @@ PNDIS_PACKET RTMP_AllocateRxPacketBuffer(VOID *reserved, VOID *dev,
 	}
 
 	if (pkt) {
-		*pa = dma_map_single(pdev, *va, size, PCI_DMA_FROMDEVICE);
+		*pa = dma_map_single(pdev, *va, size, DMA_FROM_DEVICE);
 	} else {
 		*va = (PVOID)NULL;
 		*pa = (NDIS_PHYSICAL_ADDRESS)0;
@@ -124,6 +123,11 @@ PNDIS_PACKET RTMP_AllocateRxPacketBuffer(VOID *reserved, VOID *dev,
 	}
 
 	return (PNDIS_PACKET)pkt;
+}
+
+inline void rx_page_frag_cache_drain(struct page *page, unsigned int count)
+{
+        __page_frag_cache_drain(page, count);
 }
 
 /*
@@ -136,10 +140,10 @@ ra_dma_addr_t linux_pci_map_single(void *pDev, void *ptr, size_t size,
 	struct device *pdev = (struct device *)pDev;
 
 	if (direction == RTMP_PCI_DMA_TODEVICE)
-		direction = PCI_DMA_TODEVICE;
+		direction = DMA_TO_DEVICE;
 
 	if (direction == RTMP_PCI_DMA_FROMDEVICE)
-		direction = PCI_DMA_FROMDEVICE;
+		direction = DMA_FROM_DEVICE;
 
 	/*
 	 *	------ Porting Information ------
@@ -171,10 +175,10 @@ void linux_pci_unmap_single(void *pDev, ra_dma_addr_t radma_addr, size_t size,
 	struct device *pdev = (struct device *)pDev;
 
 	if (direction == RTMP_PCI_DMA_TODEVICE)
-		direction = PCI_DMA_TODEVICE;
+		direction = DMA_TO_DEVICE;
 
 	if (direction == RTMP_PCI_DMA_FROMDEVICE)
-		direction = PCI_DMA_FROMDEVICE;
+		direction = DMA_FROM_DEVICE;
 
 	if (size > 0)
 		dma_unmap_single(pdev, DmaAddr, size, direction);

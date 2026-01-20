@@ -574,13 +574,17 @@ static INT tm_tasklet_hif_schedule_task(RTMP_ADAPTER *pAd, enum task_type type)
 	POS_COOKIE obj = (POS_COOKIE)pAd->OS_Cookie;
 
 	switch (type) {
-	case CMD_MSG_TASK:
-
-		break;
+        case TR_DONE_TASK:
+                RTMP_OS_TASKLET_SCHE(&obj->tr_done_task);
+                break;
 
 	case TX_DONE_TASK:
 		RTMP_OS_TASKLET_SCHE(&obj->tx_dma_done_task);
 		break;
+
+        case CMD_MSG_TASK:
+
+                break;
 
 	case RX_DONE_TASK:
 		RTMP_OS_TASKLET_SCHE(&obj->rx_done_task[HIF_RX_IDX0]);
@@ -608,9 +612,6 @@ static INT tm_tasklet_hif_schedule_task(RTMP_ADAPTER *pAd, enum task_type type)
 		break;
 #endif
 
-	case TR_DONE_TASK:
-		RTMP_OS_TASKLET_SCHE(&obj->tr_done_task);
-		break;
 
 	default:
 

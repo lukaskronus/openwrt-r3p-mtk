@@ -109,7 +109,7 @@ ifdef TARGETCC
     export BISON=$(TARGETBISON)
     export YACC=$(TARGETYACC)
 else
-    export CC=$(CROSS_COMPILE)gcc
+    export CC=ccache $(CROSS_COMPILE)gcc
     export LD=$(CROSS_COMPILE)ld
     export AR=$(CROSS_COMPILE)ar
     export AR_RC=$(CROSS_COMPILE)ar rc

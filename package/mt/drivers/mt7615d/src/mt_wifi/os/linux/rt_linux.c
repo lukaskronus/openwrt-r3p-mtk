@@ -826,10 +826,7 @@ static inline void __RtmpOSFSInfoChange(OS_FS_INFO *pOSFSInfo, BOOLEAN bSet)
 		/* pOSFSInfo->fsgid = (int)(current_fsgid()); */
 #endif
 #endif
-		pOSFSInfo->fs = get_fs();
-		set_fs(KERNEL_DS);
 	} else {
-		set_fs(pOSFSInfo->fs);
 #if (KERNEL_VERSION(2, 6, 29) > LINUX_VERSION_CODE)
 		current->fsuid = pOSFSInfo->fsuid;
 		current->fsgid = pOSFSInfo->fsgid;
@@ -1699,7 +1696,7 @@ VOID RtmpDrvAllMacPrint(IN VOID *pReserved, IN UINT32 *pBufMac,
 			IN UINT32 AddrStart, IN UINT32 AddrEnd,
 			IN UINT32 AddrStep)
 {
-	struct file *file_w;
+/*	struct file *file_w;
 	RTMP_STRING *fileName = "MacDump.txt";
 	mm_segment_t orig_fs;
 	RTMP_STRING *msg;
@@ -1712,7 +1709,6 @@ VOID RtmpDrvAllMacPrint(IN VOID *pReserved, IN UINT32 *pBufMac,
 
 	orig_fs = get_fs();
 	set_fs(KERNEL_DS);
-	/* open file */
 	file_w = filp_open(fileName, O_WRONLY | O_CREAT, 0);
 
 	if (IS_ERR(file_w)) {
@@ -1725,11 +1721,9 @@ VOID RtmpDrvAllMacPrint(IN VOID *pReserved, IN UINT32 *pBufMac,
 			macAddr = AddrStart;
 
 			while (macAddr <= AddrEnd) {
-				/*				RTMP_IO_READ32(pAd, macAddr, &macValue); // sample */
 				macValue = *pBufMac++;
 				sprintf(msg, "%04x = %08x\n", macAddr,
 					macValue);
-				/* write data to file */
 #if (KERNEL_VERSION(4, 1, 0) > LINUX_VERSION_CODE)
 				if (file_w->f_op->write) {
 					file_w->f_op->write(file_w, msg,
@@ -1762,12 +1756,13 @@ VOID RtmpDrvAllMacPrint(IN VOID *pReserved, IN UINT32 *pBufMac,
 
 	set_fs(orig_fs);
 	os_free_mem(msg);
+*/
 }
 
 VOID RtmpDrvAllE2PPrint(IN VOID *pReserved, IN USHORT *pMacContent,
 			IN UINT32 AddrEnd, IN UINT32 AddrStep)
 {
-	struct file *file_w;
+/*	struct file *file_w;
 	RTMP_STRING *fileName = "EEPROMDump.txt";
 	mm_segment_t orig_fs;
 	RTMP_STRING *msg;
@@ -1781,7 +1776,6 @@ VOID RtmpDrvAllE2PPrint(IN VOID *pReserved, IN USHORT *pMacContent,
 
 	orig_fs = get_fs();
 	set_fs(KERNEL_DS);
-	/* open file */
 	file_w = filp_open(fileName, O_WRONLY | O_CREAT, 0);
 
 	if (IS_ERR(file_w)) {
@@ -1797,7 +1791,6 @@ VOID RtmpDrvAllE2PPrint(IN VOID *pReserved, IN USHORT *pMacContent,
 				eepValue = *pMacContent;
 				sprintf(msg, "%08x = %04x\n", eepAddr,
 					eepValue);
-				/* write data to file */
 #if (KERNEL_VERSION(4, 1, 0) > LINUX_VERSION_CODE)
 				if (file_w->f_op->write) {
 					file_w->f_op->write(file_w, msg,
@@ -1831,17 +1824,17 @@ VOID RtmpDrvAllE2PPrint(IN VOID *pReserved, IN USHORT *pMacContent,
 
 	set_fs(orig_fs);
 	os_free_mem(msg);
+*/
 }
 
 VOID RtmpDrvAllRFPrint(IN VOID *pReserved, IN UCHAR *pBuf, IN UINT32 BufLen)
 {
-	struct file *file_w;
+/*	struct file *file_w;
 	RTMP_STRING *fileName = "RFDump.txt";
 	mm_segment_t orig_fs;
 
 	orig_fs = get_fs();
 	set_fs(KERNEL_DS);
-	/* open file */
 	file_w = filp_open(fileName, O_WRONLY | O_CREAT, 0);
 
 	if (IS_ERR(file_w)) {
@@ -1851,7 +1844,6 @@ VOID RtmpDrvAllRFPrint(IN VOID *pReserved, IN UCHAR *pBuf, IN UINT32 BufLen)
 	} else {
 		if (file_w->f_op) {
 			file_w->f_pos = 0;
-			/* write data to file */
 #if (KERNEL_VERSION(4, 1, 0) > LINUX_VERSION_CODE)
 			if (file_w->f_op->write) {
 				file_w->f_op->write(file_w, pBuf, BufLen,
@@ -1873,6 +1865,7 @@ VOID RtmpDrvAllRFPrint(IN VOID *pReserved, IN UCHAR *pBuf, IN UINT32 BufLen)
 	}
 
 	set_fs(orig_fs);
+*/
 }
 
 /*
@@ -2101,22 +2094,25 @@ BOOLEAN RtmpOsStatsAlloc(IN VOID **ppStats, IN VOID **ppIwStats)
  */
 VOID RtmpOsPktRcvHandle(PNDIS_PACKET pNetPkt)
 {
-	struct sk_buff *pRxPkt = RTPKT_TO_OSPKT(pNetPkt);
+	struct sk_buff *skb = RTPKT_TO_OSPKT(pNetPkt);
 #ifdef CONFIG_CSO_SUPPORT
-	struct net_device *pNetDev = GET_OS_PKT_NETDEV(pNetPkt);
+	struct net_device *pNetDev =  GET_OS_PKT_NETDEV(pNetPkt);
 #endif /* CONFIG_CSO_SUPPORT */
+
 #ifdef CONFIG_CSO_SUPPORT
 
 	if (pNetDev->features & NETIF_F_HW_CSUM) {
 		if (RTMP_GET_TCP_CHKSUM_FAIL(pNetPkt))
-			pRxPkt->ip_summed = CHECKSUM_NONE;
+			skb->ip_summed = CHECKSUM_NONE;
 		else
-			pRxPkt->ip_summed = CHECKSUM_UNNECESSARY;
+			skb->ip_summed = CHECKSUM_UNNECESSARY;
 	}
 
 #endif /* CONFIG_CSO_SUPPORT */
-	netif_rx(pRxPkt);
+
+		netif_rx(skb);
 }
+
 
 VOID RtmpOsTaskPidInit(RTMP_OS_PID *pPid)
 {

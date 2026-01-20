@@ -336,7 +336,7 @@ typedef struct _OS_FS_INFO_
 {
 	int				fsuid;
 	int				fsgid;
-	mm_segment_t	fs;
+//	mm_segment_t	fs;
 } OS_FS_INFO;
 
 #define IS_FILE_OPEN_ERR(_fd) 	((_fd == NULL) || IS_ERR((_fd)))

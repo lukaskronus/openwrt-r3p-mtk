@@ -92,7 +92,7 @@ static inline void netdev_priv_set(struct net_device *dev, void *priv)
 }
 
 
-ULONG RTDebugLevel = RT_DEBUG_ERROR;
+ULONG RTDebugLevel = DBG_LVL_ERROR;
 ULONG RTDebugFunc = 0;
 
 #ifdef OS_ABL_FUNC_SUPPORT
@@ -914,10 +914,7 @@ static inline void __RtmpOSFSInfoChange(OS_FS_INFO * pOSFSInfo, BOOLEAN bSet)
 
 #endif
 #endif
-		pOSFSInfo->fs = get_fs();
-		set_fs(KERNEL_DS);
 	} else {
-		set_fs(pOSFSInfo->fs);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
 		current->fsuid = pOSFSInfo->fsuid;
 		current->fsgid = pOSFSInfo->fsgid;
@@ -1925,49 +1922,7 @@ VOID RtmpDrvAllMacPrint(
 	IN UINT32 AddrStart,
 	IN UINT32 AddrEnd,
 	IN UINT32 AddrStep)
-{
-	struct file *file_w;
-	RTMP_STRING *fileName = "MacDump.txt";
-	mm_segment_t orig_fs;
-	RTMP_STRING *msg;
-	UINT32 macAddr = 0, macValue = 0;
-
-	os_alloc_mem(NULL, (UCHAR **)&msg, 1024);
-	if (!msg)
-		return;
-
-	orig_fs = get_fs();
-	set_fs(KERNEL_DS);
-
-	/* open file */
-	file_w = filp_open(fileName, O_WRONLY | O_CREAT, 0);
-	if (IS_ERR(file_w)) {
-		DBGPRINT(RT_DEBUG_TRACE,
-			 ("-->2) %s: Error %ld opening %s\n", __FUNCTION__,
-			  -PTR_ERR(file_w), fileName));
-	} else {
-		if (file_w->f_op) {
-			file_w->f_pos = 0;
-			macAddr = AddrStart;
-
-			while (macAddr <= AddrEnd) {
-/*				RTMP_IO_READ32(pAd, macAddr, &macValue); // sample */
-				macValue = *pBufMac++;
-				sprintf(msg, "%04x = %08x\n", macAddr, macValue);
-
-				/* write data to file */
-				kernel_write(file_w, msg, strlen(msg), &file_w->f_pos);
-
-				printk("%s", msg);
-				macAddr += AddrStep;
-			}
-			sprintf(msg, "\nDump all MAC values to %s\n", fileName);
-		}
-		filp_close(file_w, NULL);
-	}
-	set_fs(orig_fs);
-	os_free_mem(NULL, msg);
-}
+{}
 
 
 VOID RtmpDrvAllE2PPrint(
@@ -1975,81 +1930,14 @@ VOID RtmpDrvAllE2PPrint(
 	IN USHORT *pMacContent,
 	IN UINT32 AddrEnd,
 	IN UINT32 AddrStep)
-{
-	struct file *file_w;
-	RTMP_STRING *fileName = "EEPROMDump.txt";
-	mm_segment_t orig_fs;
-	RTMP_STRING *msg;
-	USHORT eepAddr = 0;
-	USHORT eepValue;
-
-	os_alloc_mem(NULL, (UCHAR **)&msg, 1024);
-	if (!msg)
-		return;
-
-	orig_fs = get_fs();
-	set_fs(KERNEL_DS);
-
-	/* open file */
-	file_w = filp_open(fileName, O_WRONLY | O_CREAT, 0);
-	if (IS_ERR(file_w)) {
-		DBGPRINT(RT_DEBUG_TRACE,
-			 ("-->2) %s: Error %ld opening %s\n", __FUNCTION__,
-			  -PTR_ERR(file_w), fileName));
-	} else {
-		if (file_w->f_op ) {
-			file_w->f_pos = 0;
-			eepAddr = 0x00;
-
-			while (eepAddr <= AddrEnd) {
-				eepValue = *pMacContent;
-				sprintf(msg, "%08x = %04x\n", eepAddr, eepValue);
-
-				/* write data to file */
-				kernel_write(file_w, msg, strlen(msg), &file_w->f_pos);
-
-				printk("%s", msg);
-				eepAddr += AddrStep;
-				pMacContent += (AddrStep >> 1);
-			}
-			sprintf(msg, "\nDump all EEPROM values to %s\n",
-				fileName);
-		}
-		filp_close(file_w, NULL);
-	}
-	set_fs(orig_fs);
-	os_free_mem(NULL, msg);
-}
+{}
 
 
 VOID RtmpDrvAllRFPrint(
 	IN VOID *pReserved,
 	IN UCHAR *pBuf,
 	IN UINT32 BufLen)
-{
-	struct file *file_w;
-	RTMP_STRING *fileName = "RFDump.txt";
-	mm_segment_t orig_fs;
-
-	orig_fs = get_fs();
-	set_fs(KERNEL_DS);
-
-	/* open file */
-	file_w = filp_open(fileName, O_WRONLY | O_CREAT, 0);
-	if (IS_ERR(file_w)) {
-		DBGPRINT(RT_DEBUG_TRACE,
-			 ("-->2) %s: Error %ld opening %s\n", __FUNCTION__,
-			  -PTR_ERR(file_w), fileName));
-	} else {
-		if (file_w->f_op ) {
-			file_w->f_pos = 0;
-			/* write data to file */
-			kernel_write(file_w, pBuf, BufLen, &file_w->f_pos);
-		}
-		filp_close(file_w, NULL);
-	}
-	set_fs(orig_fs);
-}
+{}
 
 
 /*
